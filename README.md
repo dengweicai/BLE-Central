@@ -1,10 +1,16 @@
 # CCNet  BlueTooth蓝牙SDK
 
-使用SDK前需导入libCCNetBluetooth.a 及 BabyBluetooth.h头文件到工程
+此文档用于说明 Central模式(App端) SDK使用
+
+
 
 
 
 ## iOS SDK 文档说明
+
+使用SDK前需导入libCCNetBluetooth.a 及 BabyBluetooth.h头文件到工程
+
+
 
 1.引入.h文件
 
@@ -121,4 +127,148 @@ if (self.characteristic.properties & CBCharacteristicPropertyNotify || self.char
 
 
 
-Android SDK文档说明(敬请期待)
+
+
+## Android SDK文档说明
+
+使用SDK前导入bluetoothkit.jar至工程，配AndroidManifest.xml文件
+
+
+
+1.创建一个BluetoothClient，建议作为一个全局单例，管理所有BLE设备的连接。
+
+```java
+BluetoothClient mClient = new BluetoothClient(context);
+```
+
+
+
+2.支持经典蓝牙和BLE设备混合扫描，可自定义扫描策略。每次扫描都要创建新的SearchRequest，不能复用。如果
+
+```java
+SearchRequest request = new SearchRequest.Builder()
+        .searchBluetoothLeDevice(3000, 3)   // 先扫BLE设备3次，每次3s
+        .searchBluetoothClassicDevice(5000) // 再扫经典蓝牙5s
+        .searchBluetoothLeDevice(2000)      // 再扫BLE设备2s
+        .build();
+
+mClient.search(request, new SearchResponse() {
+    @Override
+    public void onSearchStarted() {
+
+    }
+
+    @Override
+    public void onDeviceFounded(SearchResult device) {
+        Beacon beacon = new Beacon(device.scanRecord);
+        BluetoothLog.v(String.format("beacon for %s\n%s", device.getAddress(), beacon.toString()));
+    }
+
+    @Override
+    public void onSearchStopped() {
+
+    }
+
+    @Override
+    public void onSearchCanceled() {
+
+    }
+});
+```
+
+如果需要手动停止扫描调用
+
+```java
+mClient.stopSearch();
+```
+
+
+
+3.扫描到设备后，对设备进行连接
+
+```java
+//如果要监听蓝牙连接状态可以注册回调，只有两个状态：连接和断开。
+mClient.registerConnectStatusListener(MAC, mBleConnectStatusListener);
+
+private final BleConnectStatusListener mBleConnectStatusListener = new BleConnectStatusListener() {
+
+    @Override
+    public void onConnectStatusChanged(String mac, int status) {
+        if (status == STATUS_CONNECTED) {
+
+        } else if (status == STATUS_DISCONNECTED) {
+
+        }
+    }
+};
+mClient.unregisterConnectStatusListener(MAC, mBleConnectStatusListener);
+
+
+//设置连接参数
+BleConnectOptions options = new BleConnectOptions.Builder()
+        .setConnectRetry(3)   // 连接如果失败重试3次
+        .setConnectTimeout(30000)   // 连接超时30s
+        .setServiceDiscoverRetry(3)  // 发现服务如果失败重试3次
+        .setServiceDiscoverTimeout(20000)  // 发现服务超时20s
+        .build();
+//开始进行连接
+mClient.connect(MAC, options, new BleConnectResponse() {
+    @Override
+    public void onResponse(int code, BleGattProfile data) {
+
+    }
+});
+
+//断开连接
+mClient.disconnect(MAC);
+```
+
+
+
+4.连接成功后从BleGattProfile data 读取serviceUUID、characterUUID，就可以开始读数据了
+
+
+
+（1）读取数据
+
+```
+mClient.read(MAC, serviceUUID, characterUUID, new BleReadResponse() {
+    @Override
+    public void onResponse(int code, byte[] data) {
+        if (code == REQUEST_SUCCESS) {
+
+        }
+    }
+});
+```
+
+（2）订阅通知
+
+```java
+//订阅通知
+mClient.notify(MAC, serviceUUID, characterUUID, new BleNotifyResponse() {
+    @Override
+    public void onNotify(UUID service, UUID character, byte[] value) {
+        
+    }
+
+    @Override
+    public void onResponse(int code) {
+        if (code == REQUEST_SUCCESS) {
+
+        }
+    }
+});
+
+
+//关闭通知
+mClient.unnotify(MAC, serviceUUID, characterUUID, new BleUnnotifyResponse() {
+    @Override
+    public void onResponse(int code) {
+        if (code == REQUEST_SUCCESS) {
+
+        }
+    }
+});
+```
+
