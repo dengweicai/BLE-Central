@@ -3,6 +3,7 @@
 
 
 此文档用于说明 Central模式(App端) SDK使用
+
 This document is used to indicate that Central (App) use the SDK
 
 
@@ -18,6 +19,7 @@ Before using the SDK to import libCCNetBluetooth.a  and BabyBluetooth.h header f
 
 
 1.引入.h文件
+
 1.Import .h file 
 
 ```objective-c
