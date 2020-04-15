@@ -42,16 +42,6 @@ baby = [BabyBluetooth shareBabyBluetooth];
 [baby setBlockOnDiscoverToPeripherals:^(CBCentralManager *central, CBPeripheral *peripheral, NSDictionary *advertisementData, NSNumber *RSSI) {
         NSLog(@"搜索到了设备:%@",peripheral.name);
 }];
-
-
-//设置查找设备的过滤器
-[baby setFilterOnDiscoverPeripherals:^BOOL(NSString *peripheralName, NSDictionary *advertisementData, NSNumber *RSSI) {
-    //最常用的场景是查找某一个前缀开头的设备
-   if ([peripheralName hasPrefix:@"TM"] ) {
-      return YES;
-   }
-     return NO;
-}];
 ```
 
 
