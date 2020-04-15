@@ -1,18 +1,24 @@
 # CCNet  BlueTooth蓝牙SDK
+# Bluetooth thermometer SDK documentation
+
 
 此文档用于说明 Central模式(App端) SDK使用
-
+This document is used to indicate that Central (App) use the SDK
 
 
 
 
 ## iOS SDK 文档说明
+## iOS SDK documentation
+
 
 使用SDK前需导入libCCNetBluetooth.a 及 BabyBluetooth.h头文件到工程
+Before using the SDK to import libCCNetBluetooth.a  and BabyBluetooth.h header file to the project
 
 
 
 1.引入.h文件
+1.Import .h file 
 
 ```objective-c
 #import "BabyBluetooth.h"
@@ -21,6 +27,7 @@
 
 
 2.初始化蓝牙库
+2. Initialize Bluetooth Library
 
 ```objective-c
 BabyBluetooth *baby;
@@ -29,38 +36,46 @@ baby = [BabyBluetooth shareBabyBluetooth];
 
 
 
-3.设置扫描设备回调，当扫描成功后保存peripheral对象，以便下一步连接设备。当然也可以通过setFilterOnDiscoverPeripherals 方法委托过滤器扫描设备名称查找目标设备。
+3.设置扫描设备回调，当扫描成功后保存peripheral对象，以便下一步连接设备。 
+3. Set the scanning device callback. When the scanning is successful, save the peripheral object, so as to connect the device in the next step.  
 
 ```objective-c
 [baby setBlockOnCentralManagerDidUpdateState:^(CBCentralManager *central) {
     if (central.state == CBCentralManagerStatePoweredOn) {
-				//设备打开成功，开始扫描设备     
+				//设备打开成功，开始扫描设备 
+				// Device opened successfully, start scanning device
     }
  }];
 
 
 [baby setBlockOnDiscoverToPeripherals:^(CBCentralManager *central, CBPeripheral *peripheral, NSDictionary *advertisementData, NSNumber *RSSI) {
-        NSLog(@"搜索到了设备:%@",peripheral.name);
+        NSLog(@"Scan device :%@",peripheral.name);
 }];
 ```
 
 
 
 4.查找到设备后开始进行设备连接
+4. Start device connection after finding the device
 
 ```objective-c
 //使用不同的channel切换委托回调,channelOnPeropheralString 为任意唯一字符串标识
+//Use different channels to switch the delegate callback, and channelOnPeropheralString is any unique string identification
+
 [baby setBlockOnConnectedAtChannel:channelOnPeropheralString block:^(CBCentralManager *central, CBPeripheral *peripheral) {
      //设备连接成功
+     //Device connected successfully
 }];
 
 [baby setBlockOnFailToConnectAtChannel:channelOnPeropheralView block:^(CBCentralManager *central, CBPeripheral *peripheral, NSError *error) {
 		//设备连接失败
+		// Device connection failed
 }];
 
 
 [baby setBlockOnDisconnectAtChannel:channelOnPeropheralView block:^(CBCentralManager *central, CBPeripheral *peripheral, NSError *error) {
      //设备断开连接
+     //Device disconnected
 }];
 
 baby.having(self.currPeripheral).and.channel(channelOnPeropheralView).then.connectToPeripherals()
@@ -69,6 +84,7 @@ baby.having(self.currPeripheral).and.channel(channelOnPeropheralView).then.conne
 
 
 5.设备连接成功后，开始读取Characteristics
+5.After the device is connected successfully, start reading Characteristics
 
 ```objective-c
 [baby setBlockOnDiscoverCharacteristics:^(CBPeripheral *peripheral, CBService *service, NSError *error) {
@@ -84,26 +100,30 @@ baby.having(self.currPeripheral).and.channel(channelOnPeropheralString).then.con
 
 
 6.获取到charateristics之后我们可以获取charateristics的值或者订阅它的通知
+6.After we get charateristics, we can get the value of charateristics or subscribe to its notifications
 
 (1)读值
+(1)Read Value
 
 ```objective-c
 [baby setBlockOnReadValueForCharacteristicAtChannel:channelOnCharacteristicView block:^(CBPeripheral *peripheral, CBCharacteristic *characteristics, NSError *error) {
 		NSLog(@"characteristic name:%@ value is:%@",characteristics.UUID,characteristics.value);
 }];
 //读取服务
+//Read service
 baby.channel(channelOnPeropheralString).characteristicDetails(self.currPeripheral,self.characteristic);
 ```
 
 (2)订阅通知
+(2) Subscribe to notifications
 
 ```objective-c
 if (self.characteristic.properties & CBCharacteristicPropertyNotify || self.characteristic.properties & CBCharacteristicPropertyIndicate) {
         
-		if(self.characteristic.isNotifying) {//取消通知
+		if(self.characteristic.isNotifying) {//取消通知   Cancellation notice
     		[baby cancelNotify:self.currPeripheral characteristic:self.characteristic];
       
-  	}else{//订阅通知
+  	}else{//订阅通知  Subscription notification
       [weakSelf.currPeripheral setNotifyValue:YES forCharacteristic:self.characteristic];
       [baby notify:self.currPeripheral  characteristic:self.characteristic
      block:^(CBPeripheral *peripheral, CBCharacteristic *characteristics, NSError *error) {
