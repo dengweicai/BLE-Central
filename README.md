@@ -14,6 +14,7 @@ This document is used to indicate that Central (App) use the SDK
 
 
 使用SDK前需导入libCCNetBluetooth.a 及 BabyBluetooth.h头文件到工程
+
 Before using the SDK to import libCCNetBluetooth.a  and BabyBluetooth.h header file to the project
 
 
@@ -29,6 +30,7 @@ Before using the SDK to import libCCNetBluetooth.a  and BabyBluetooth.h header f
 
 
 2.初始化蓝牙库
+
 2. Initialize Bluetooth Library
 
 ```objective-c
@@ -39,6 +41,7 @@ baby = [BabyBluetooth shareBabyBluetooth];
 
 
 3.设置扫描设备回调，当扫描成功后保存peripheral对象，以便下一步连接设备。 
+
 3. Set the scanning device callback. When the scanning is successful, save the peripheral object, so as to connect the device in the next step.  
 
 ```objective-c
@@ -58,6 +61,7 @@ baby = [BabyBluetooth shareBabyBluetooth];
 
 
 4.查找到设备后开始进行设备连接
+
 4. Start device connection after finding the device
 
 ```objective-c
@@ -86,6 +90,7 @@ baby.having(self.currPeripheral).and.channel(channelOnPeropheralView).then.conne
 
 
 5.设备连接成功后，开始读取Characteristics
+
 5.After the device is connected successfully, start reading Characteristics
 
 ```objective-c
@@ -102,9 +107,11 @@ baby.having(self.currPeripheral).and.channel(channelOnPeropheralString).then.con
 
 
 6.获取到charateristics之后我们可以获取charateristics的值或者订阅它的通知
+
 6.After we get charateristics, we can get the value of charateristics or subscribe to its notifications
 
 (1)读值
+
 (1)Read Value
 
 ```objective-c
@@ -117,6 +124,7 @@ baby.channel(channelOnPeropheralString).characteristicDetails(self.currPeriphera
 ```
 
 (2)订阅通知
+
 (2) Subscribe to notifications
 
 ```objective-c
