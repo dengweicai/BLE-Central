@@ -1,4 +1,4 @@
-# CCNet  BlueTooth蓝牙SDK
+# CCNet  BlueTooth蓝牙SDK -- test
 
 此文档用于说明 Central模式(App端) SDK使用
 
